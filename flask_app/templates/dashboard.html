@@ -1,0 +1,45 @@
+<!-- flask_app/templates/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Container Monitoring Dashboard</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+      iframe {
+        border: none;
+        width: 100%;
+        height: 100%;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      h1 {
+        text-align: center;
+        padding: 10px;
+        margin: 0;
+        background-color: #f0f0f0;
+      }
+      .dashboard-frame {
+        flex-grow: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Live Container and Host Monitoring</h1>
+      <div class="dashboard-frame">
+        <iframe src="{{ grafana_url }}"></iframe>
+      </div>
+    </div>
+  </body>
+</html>
