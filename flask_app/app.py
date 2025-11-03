@@ -5,10 +5,10 @@ app = Flask(__name__)
 
 @app.route('/')
 def dashboard():
-    # !!! IMPORTANT: Replace this URL with your own!
-    # Get it from Grafana: Dashboard -> Share -> Embed -> Copy the src="" part of the iframe.
-    # Add "&kiosk" at the end for full-screen view.
-    grafana_url = "http://localhost:3000/d/advxfjg/first-grafana-dashboard?orgId=1&kiosk"
+    # This URL embeds the Grafana dashboard.
+    # The UID 'container-monitoring-dashboard' is defined in the grafana-dashboard.json file.
+    # The '&kiosk' parameter provides a clean, full-screen view without Grafana's UI elements.
+    grafana_url = "http://localhost:3000/d/container-monitoring-dashboard/container-host-monitoring-dashboard?orgId=1&refresh=10s&kiosk"
     
     return render_template('dashboard.html', grafana_url=grafana_url)
 

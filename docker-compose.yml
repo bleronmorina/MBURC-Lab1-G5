@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+  monitoring-net:
+    driver: bridge
+
 services:
   prometheus:
     image: prom/prometheus:latest
@@ -8,6 +12,13 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - monitoring-net
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
 
   grafana:
     image: grafana/grafana-oss:latest
@@ -16,13 +27,15 @@ services:
       - "3000:3000"
     volumes:
       - ./grafana-config/provisioning:/etc/grafana/provisioning
-      - ./grafana-config/grafana.ini:/etc/grafana/ini/grafana.ini
-      - grafana-storage:/var/lib/grafana
+      - ./grafana-config/dashboards:/etc/grafana/provisioning/dashboards
+      - ./grafana-config/grafana.ini:/etc/grafana/grafana.ini
     depends_on:
       - prometheus
+    networks:
+      - monitoring-net
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
+    image: gcr.io/cadvisor/cadvisor:latest 
     container_name: cadvisor
     privileged: true
     ports:
@@ -32,6 +45,28 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /sys:/sys:ro
       - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - monitoring-net
+    command:
+      - '--docker_only'
+      - '--store_container_labels=false'
 
-volumes:
-  grafana-storage:
+  monitoring_ui:
+    build:
+      context: ./flask_app
+    container_name: monitoring_ui
+    ports:
+      - "5000:5000"
+    depends_on:
+      - grafana
+    networks:
+      - monitoring-net
+
+  test_app:
+    build:
+      context: ./sample-apps/flask-test-app
+    container_name: test-app
+    ports:
+      - "5001:5000"
+    networks:
+      - monitoring-net

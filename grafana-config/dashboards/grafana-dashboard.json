@@ -24,31 +24,37 @@
     "links": [],
     "panels": [
         {
-            "collapsed": false,
+            "type": "row",
+            "title": "Host System Metrics (Windows)",
             "gridPos": {
                 "h": 1,
                 "w": 24,
                 "x": 0,
                 "y": 0
             },
-            "id": 20,
-            "panels": [],
-            "title": "Host & Fleet Overview",
-            "type": "row"
+            "collapsed": false
         },
         {
+            "title": "Host CPU Usage",
+            "type": "stat",
             "gridPos": {
-                "h": 7,
+                "h": 8,
                 "w": 6,
                 "x": 0,
                 "y": 1
             },
-            "id": 10,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "Prometheus"
+            },
+            "pluginVersion": "10.2.2",
+            "targets": [
+                {
+                    "expr": "100 - (avg by (instance) (rate(windows_cpu_time_total{mode=\"idle\"}[2m])) * 100)",
+                    "refId": "A"
+                }
+            ],
             "options": {
-                "colorMode": "value",
-                "graphMode": "none",
-                "justifyMode": "auto",
-                "orientation": "auto",
                 "reduceOptions": {
                     "calcs": [
                         "lastNotNull"
@@ -56,36 +62,32 @@
                     "fields": "",
                     "values": false
                 },
-                "textMode": "auto"
-            },
-            "pluginVersion": "10.2.2",
-            "targets": [
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "Prometheus"
-                    },
-                    "expr": "count(container_last_seen{name!~\"cadvisor|prometheus|grafana\"})",
-                    "instant": true,
-                    "refId": "A"
-                }
-            ],
-            "title": "Monitored Application Containers",
-            "type": "stat"
+                "orientation": "auto",
+                "graphMode": "area",
+                "colorMode": "value",
+                "unit": "percent"
+            }
         },
         {
+            "title": "Host Memory Usage",
+            "type": "stat",
             "gridPos": {
-                "h": 7,
+                "h": 8,
                 "w": 6,
                 "x": 6,
                 "y": 1
             },
-            "id": 8,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "Prometheus"
+            },
+            "targets": [
+                {
+                    "expr": "100 * (1 - (windows_memory_free_bytes / windows_memory_total_bytes))",
+                    "refId": "A"
+                }
+            ],
             "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
                 "reduceOptions": {
                     "calcs": [
                         "lastNotNull"
@@ -93,81 +95,124 @@
                     "fields": "",
                     "values": false
                 },
-                "sparkline": {
-                    "show": true
-                },
-                "textMode": "auto",
+                "orientation": "auto",
+                "graphMode": "area",
+                "colorMode": "value",
                 "unit": "percent"
-            },
-            "pluginVersion": "10.2.2",
-            "targets": [
-                {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "Prometheus"
-                    },
-                    "expr": "100 - (avg(rate(windows_cpu_time_total{mode=\"idle\"}[2m])) * 100)",
-                    "instant": false,
-                    "refId": "A"
-                }
-            ],
-            "title": "Host CPU Usage",
-            "type": "stat"
+            }
         },
         {
+            "title": "Host Network Traffic",
+            "type": "timeseries",
             "gridPos": {
-                "h": 7,
+                "h": 8,
                 "w": 6,
                 "x": 12,
                 "y": 1
             },
-            "id": 9,
-            "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "fields": "",
-                    "values": false
-                },
-                "sparkline": {
-                    "show": true
-                },
-                "textMode": "auto",
-                "unit": "percent"
+            "datasource": {
+                "type": "prometheus",
+                "uid": "Prometheus"
             },
-            "pluginVersion": "10.2.2",
             "targets": [
                 {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "Prometheus"
-                    },
-                    "expr": "100 * (1 - (windows_memory_free_bytes / windows_memory_total_bytes))",
-                    "instant": false,
+                    "expr": "sum(rate(windows_net_bytes_total{status=\"up\"}[5m])) by (instance)",
+                    "legendFormat": "Total",
                     "refId": "A"
                 }
             ],
-            "title": "Host Memory Usage",
-            "type": "stat"
+            "options": {
+                "tooltip": {
+                    "mode": "multi"
+                },
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "unit": "Bps"
+                }
+            }
         },
         {
+            "title": "Host Logical Disk I/O",
+            "type": "timeseries",
             "gridPos": {
-                "h": 7,
+                "h": 8,
                 "w": 6,
                 "x": 18,
                 "y": 1
             },
-            "id": 12,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "Prometheus"
+            },
+            "targets": [
+                {
+                    "expr": "sum(rate(windows_logical_disk_read_seconds_total[5m])) by (instance)",
+                    "legendFormat": "Read",
+                    "refId": "A"
+                },
+                {
+                    "expr": "sum(rate(windows_logical_disk_write_seconds_total[5m])) by (instance)",
+                    "legendFormat": "Write",
+                    "refId": "B"
+                }
+            ],
             "options": {
-                "colorMode": "value",
-                "graphMode": "area",
-                "justifyMode": "auto",
-                "orientation": "auto",
+                "tooltip": {
+                    "mode": "multi"
+                },
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                }
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "palette-classic"
+                    },
+                    "unit": "iops"
+                }
+            }
+        },
+        {
+            "type": "row",
+            "title": "Container Fleet Overview",
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 9
+            },
+            "collapsed": false
+        },
+        {
+            "title": "Monitored Application Containers",
+            "type": "stat",
+            "gridPos": {
+                "h": 8,
+                "w": 6,
+                "x": 0,
+                "y": 10
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "Prometheus"
+            },
+            "targets": [
+                {
+                    "expr": "count(container_last_seen{name!~\"cadvisor|prometheus|grafana|monitoring_ui|windows-exporter\"})",
+                    "refId": "A"
+                }
+            ],
+            "options": {
                 "reduceOptions": {
                     "calcs": [
                         "lastNotNull"
@@ -175,154 +220,206 @@
                     "fields": "",
                     "values": false
                 },
-                "sparkline": {
-                    "show": true
-                },
-                "textMode": "auto",
-                "unit": "MB"
+                "orientation": "auto",
+                "graphMode": "none",
+                "colorMode": "value"
+            }
+        },
+        {
+            "title": "Total App CPU Usage",
+            "type": "stat",
+            "gridPos": {
+                "h": 8,
+                "w": 6,
+                "x": 6,
+                "y": 10
             },
-            "pluginVersion": "10.2.2",
+            "datasource": {
+                "type": "prometheus",
+                "uid": "Prometheus"
+            },
             "targets": [
                 {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "Prometheus"
-                    },
-                    "expr": "sum(container_memory_usage_bytes{name!~\"cadvisor|prometheus|grafana\"}) / 1024 / 1024",
-                    "instant": false,
+                    "expr": "sum(rate(container_cpu_usage_seconds_total{name!~\"cadvisor|prometheus|grafana|monitoring_ui|windows-exporter\"}[2m])) * 100",
                     "refId": "A"
                 }
             ],
-            "title": "Total App Memory Usage",
-            "type": "stat"
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "orientation": "auto",
+                "graphMode": "area",
+                "colorMode": "value",
+                "unit": "percent"
+            }
         },
         {
-            "collapsed": false,
+            "title": "Total App Memory Usage",
+            "type": "stat",
+            "gridPos": {
+                "h": 8,
+                "w": 6,
+                "x": 12,
+                "y": 10
+            },
+            "datasource": {
+                "type": "prometheus",
+                "uid": "Prometheus"
+            },
+            "targets": [
+                {
+                    "expr": "sum(container_memory_usage_bytes{name!~\"cadvisor|prometheus|grafana|monitoring_ui|windows-exporter\"})",
+                    "refId": "A"
+                }
+            ],
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "orientation": "auto",
+                "graphMode": "area",
+                "colorMode": "value",
+                "unit": "bytes"
+            }
+        },
+        {
+            "type": "row",
+            "title": "Individual Container Drill-Down",
             "gridPos": {
                 "h": 1,
                 "w": 24,
                 "x": 0,
-                "y": 8
+                "y": 18
             },
-            "id": 18,
-            "panels": [],
-            "title": "Individual Container Drill-down (Select from dropdown above)",
-            "type": "row"
+            "collapsed": false
         },
         {
+            "title": "CPU Usage",
+            "type": "timeseries",
             "gridPos": {
-                "h": 10,
+                "h": 9,
                 "w": 8,
                 "x": 0,
-                "y": 9
+                "y": 19
             },
-            "id": 1,
-            "options": {
-                "legend": {
-                    "calcs": [],
-                    "displayMode": "list",
-                    "placement": "bottom",
-                    "showLegend": true
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "none"
-                },
-                "unit": "percent"
+            "datasource": {
+                "type": "prometheus",
+                "uid": "Prometheus"
             },
             "targets": [
                 {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "Prometheus"
-                    },
                     "expr": "sum(rate(container_cpu_usage_seconds_total{name=~\"$container\"}[5m])) by (name) * 100",
                     "legendFormat": "{{name}}",
                     "refId": "A"
                 }
             ],
-            "title": "CPU Usage",
-            "type": "timeseries"
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percent",
+                    "color": {
+                        "mode": "palette-classic"
+                    }
+                }
+            },
+            "options": {
+                "tooltip": {
+                    "mode": "multi"
+                },
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                }
+            }
         },
         {
+            "title": "Memory Usage",
+            "type": "timeseries",
             "gridPos": {
-                "h": 10,
+                "h": 9,
                 "w": 8,
                 "x": 8,
-                "y": 9
+                "y": 19
             },
-            "id": 2,
-            "options": {
-                "legend": {
-                    "calcs": [],
-                    "displayMode": "list",
-                    "placement": "bottom",
-                    "showLegend": true
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "none"
-                },
-                "unit": "megabytes"
+            "datasource": {
+                "type": "prometheus",
+                "uid": "Prometheus"
             },
             "targets": [
                 {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "Prometheus"
-                    },
-                    "expr": "sum(container_memory_usage_bytes{name=~\"$container\"}) by (name) / 1024 / 1024",
+                    "expr": "sum(container_memory_usage_bytes{name=~\"$container\"}) by (name)",
                     "legendFormat": "{{name}}",
                     "refId": "A"
                 }
             ],
-            "title": "Memory Usage",
-            "type": "timeseries"
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "bytes",
+                    "color": {
+                        "mode": "palette-classic"
+                    }
+                }
+            },
+            "options": {
+                "tooltip": {
+                    "mode": "multi"
+                },
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                }
+            }
         },
         {
+            "title": "Network I/O",
+            "type": "timeseries",
             "gridPos": {
-                "h": 10,
+                "h": 9,
                 "w": 8,
                 "x": 16,
-                "y": 9
+                "y": 19
             },
-            "id": 4,
-            "options": {
-                "legend": {
-                    "calcs": [],
-                    "displayMode": "list",
-                    "placement": "bottom",
-                    "showLegend": true
-                },
-                "tooltip": {
-                    "mode": "multi",
-                    "sort": "none"
-                },
-                "unit": "Bps"
+            "datasource": {
+                "type": "prometheus",
+                "uid": "Prometheus"
             },
             "targets": [
                 {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "Prometheus"
-                    },
                     "expr": "sum(rate(container_network_receive_bytes_total{name=~\"$container\"}[5m])) by (name)",
                     "legendFormat": "{{name}} - Inbound",
                     "refId": "A"
                 },
                 {
-                    "datasource": {
-                        "type": "prometheus",
-                        "uid": "Prometheus"
-                    },
                     "expr": "sum(rate(container_network_transmit_bytes_total{name=~\"$container\"}[5m])) by (name)",
-                    "hide": false,
                     "legendFormat": "{{name}} - Outbound",
                     "refId": "B"
                 }
             ],
-            "title": "Network I/O",
-            "type": "timeseries"
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "Bps",
+                    "color": {
+                        "mode": "palette-classic"
+                    }
+                }
+            },
+            "options": {
+                "tooltip": {
+                    "mode": "multi"
+                },
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                }
+            }
         }
     ],
     "refresh": "10s",
@@ -337,14 +434,14 @@
                     "type": "prometheus",
                     "uid": "Prometheus"
                 },
-                "definition": "label_values(container_cpu_usage_seconds_total{name!~\"cadvisor|prometheus|grafana\"}, name)",
+                "definition": "label_values(container_cpu_usage_seconds_total{name!~\"cadvisor|prometheus|grafana|monitoring_ui|windows-exporter\"}, name)",
                 "hide": 0,
                 "includeAll": false,
                 "multi": false,
                 "name": "container",
                 "options": [],
                 "query": {
-                    "query": "label_values(container_cpu_usage_seconds_total{name!~\"cadvisor|prometheus|grafana\"}, name)",
+                    "query": "label_values(container_cpu_usage_seconds_total{name!~\"cadvisor|prometheus|grafana|monitoring_ui|windows-exporter\"}, name)",
                     "refId": "StandardVariableQuery"
                 },
                 "refresh": 1,
@@ -361,8 +458,8 @@
     },
     "timepicker": {},
     "timezone": "browser",
-    "title": "Cloud Resource Monitoring (Group 5)",
-    "uid": "advxfjg",
-    "version": 4,
+    "title": "Container & Host Monitoring Dashboard",
+    "uid": "container-monitoring-dashboard",
+    "version": 1,
     "weekStart": ""
 }

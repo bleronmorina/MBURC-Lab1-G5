@@ -1,54 +1,37 @@
-from flask import Flask, request
+from flask import Flask, render_template
+from prometheus_flask_exporter import PrometheusMetrics
 import math
 import time
+import random
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
+
+# Static information for the homepage
+metrics.info('app_info', 'Test application for generating load', version='1.0.0')
 
 @app.route('/')
 def index():
-    """Homepage: Shows a welcome message and instructions."""
-    return """
-    <h1>Test Application for Monitoring</h1>
-    <p>Use the following endpoints to generate load:</p>
-    <ul>
-        <li><a href="/cpu-work" target="_blank">/cpu-work</a> - Runs a CPU-intensive task.</li>
-        <li><a href="/memory-work" target="_blank">/memory-work</a> - Allocates 100MB of memory temporarily.</li>
-    </ul>
-    """
+    """Homepage: Renders a simple UI to trigger load generation."""
+    return render_template('index.html')
 
-@app.route('/cpu-work')
-def cpu_work():
-    """
-    Simulates a CPU-intensive task by performing millions of calculations.
-    """
+@app.route('/cpu')
+def cpu_intensive_task():
+    """Simulates a CPU-intensive task."""
     start_time = time.time()
-    print("Starting CPU-intensive task...")
-    
-    for i in range(50_000_000):
-        _ = math.sqrt(i)
-        
-    end_time = time.time()
-    duration = end_time - start_time
-    print(f"CPU task finished in {duration:.2f} seconds.")
+    for i in range(20_000_000):
+        _ = math.sqrt(float(i))
+    duration = time.time() - start_time
     return f"CPU-intensive task completed in {duration:.2f} seconds."
 
-@app.route('/memory-work')
-def memory_work():
-    """
-    Simulates a memory-intensive task by allocating a large string in memory.
-    """
-    start_time = time.time()
-    mb_to_allocate = 100
-    print(f"Allocating {mb_to_allocate}MB of memory...")
-    
-    large_string = ' ' * (mb_to_allocate * 1024 * 1024)
-    
-    time.sleep(2)
-    
-    end_time = time.time()
-    duration = end_time - start_time
-    print(f"Allocated and released memory in {duration:.2f} seconds.")
-    return f"Allocated and released {mb_to_allocate}MB of memory in {duration:.2f} seconds."
+@app.route('/memory')
+def memory_intensive_task():
+    """Simulates a memory-intensive task by allocating a large object."""
+    mb_to_allocate = random.randint(50, 150)
+    # This creates a large list of strings in memory
+    _ = [' ' * 1024] * (mb_to_allocate * 1024)
+    time.sleep(1) # Hold the memory for a short duration
+    return f"Allocated and released approximately {mb_to_allocate}MB of memory."
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
